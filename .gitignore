@@ -1,0 +1,23 @@
+# FVM Version Cache
+.fvm/
+
+# Flutter
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+build/
+
+# Android
+**/.gradle/
+**/local.properties
+**/key.properties
+**/*.keystore
+**/*.jks
+**/.cxx/
+
+# IDE
+.idea/
+*.iml
+.vscode/

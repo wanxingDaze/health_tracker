@@ -9,9 +9,6 @@ void main() async {
   final weightRepo = WeightRepository();
   final userRepo = UserRepository();
   await Future.wait([weightRepo.load(), userRepo.load()]);
-  if (weightRepo.records.isEmpty) {
-    await weightRepo.loadSimulatedData(365);
-  }
   runApp(HealthTrackerApp(weightRepository: weightRepo, userRepository: userRepo));
 }
 
@@ -29,14 +26,14 @@ class HealthTrackerApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF3A96F5)),
         useMaterial3: true,
         filledButtonTheme: FilledButtonThemeData(
-          style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+          style: FilledButton.styleFrom(minimumSize: const Size(64, 48)),
         ),
         textButtonTheme: TextButtonThemeData(
-          style: TextButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+          style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
         ),
         segmentedButtonTheme: SegmentedButtonThemeData(
           style: ButtonStyle(
-            minimumSize: WidgetStateProperty.all(const Size(0, AppDimens.buttonMinHeight)),
+            minimumSize: WidgetStateProperty.all(const Size(48, AppDimens.buttonMinHeight)),
           ),
         ),
       ),

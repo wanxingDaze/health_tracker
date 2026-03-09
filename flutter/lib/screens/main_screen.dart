@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/weight_record.dart';
 import '../services/weight_repository.dart';
 import '../services/user_repository.dart';
-import '../widgets/weight_chart.dart';
 import '../widgets/weight_list.dart';
 import '../widgets/add_weight_dialog.dart';
 import 'user_profile_screen.dart';
@@ -27,19 +25,6 @@ class MainScreen extends StatelessWidget {
               ),
             ),
           ),
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert),
-            onSelected: (value) {
-              final days = int.tryParse(value);
-              if (days != null) weightRepository.loadSimulatedData(days);
-            },
-            itemBuilder: (_) => [
-              const PopupMenuItem(value: '7', child: Row(children: [Icon(Icons.science_outlined, size: 20), SizedBox(width: 8), Text('模拟 7 天')])),
-              const PopupMenuItem(value: '30', child: Row(children: [Icon(Icons.science_outlined, size: 20), SizedBox(width: 8), Text('模拟 30 天')])),
-              const PopupMenuItem(value: '365', child: Row(children: [Icon(Icons.science_outlined, size: 20), SizedBox(width: 8), Text('模拟 365 天')])),
-              const PopupMenuItem(value: '500', child: Row(children: [Icon(Icons.science_outlined, size: 20), SizedBox(width: 8), Text('模拟 500 天')])),
-            ],
-          ),
           IconButton(
             icon: const Icon(Icons.add_circle),
             onPressed: () => _showAddDialog(context),
@@ -58,6 +43,7 @@ class MainScreen extends StatelessWidget {
             averageWeightLast7Days: weightRepository.averageWeightLast7Days,
             weekOverWeekChange: weightRepository.weekOverWeekChange,
             onDelete: weightRepository.delete,
+            onDeleteBatch: weightRepository.deleteBatch,
             userProfile: userRepository.profile,
           );
         },
@@ -90,7 +76,7 @@ class MainScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (_) => AddWeightDialog(
-        onSave: (record) => weightRepository.add(record),
+        onSave: (record) async => await weightRepository.add(record),
       ),
     );
   }

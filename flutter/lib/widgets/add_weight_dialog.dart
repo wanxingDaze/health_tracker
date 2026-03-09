@@ -4,7 +4,7 @@ import '../models/activity.dart';
 import '../theme/app_dimens.dart';
 
 class AddWeightDialog extends StatefulWidget {
-  final void Function(WeightRecord) onSave;
+  final Future<void> Function(WeightRecord) onSave;
 
   const AddWeightDialog({
     super.key,
@@ -20,6 +20,7 @@ class _AddWeightDialogState extends State<AddWeightDialog> {
   final _noteController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
   final Set<String> _selectedActivities = {};
+  bool _isSaving = false;
 
   void _toggleActivity(Activity a) {
     setState(() {
@@ -78,16 +79,22 @@ class _AddWeightDialogState extends State<AddWeightDialog> {
     if (date != null) setState(() => _selectedDate = date);
   }
 
-  void _save() {
-    if (!_isValid) return;
-    widget.onSave(WeightRecord(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      weight: double.parse(_weightController.text),
-      date: DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day),
-      note: _noteController.text.isEmpty ? null : _noteController.text,
-      activities: _selectedActivities.toList(),
-    ));
-    if (mounted) Navigator.of(context).pop();
+  Future<void> _save() async {
+    if (!_isValid || _isSaving) return;
+    setState(() => _isSaving = true);
+    try {
+      final record = WeightRecord(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        weight: double.parse(_weightController.text),
+        date: DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day),
+        note: _noteController.text.isEmpty ? null : _noteController.text,
+        activities: _selectedActivities.toList(),
+      );
+      await widget.onSave(record);
+      if (mounted) Navigator.of(context).pop();
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
   }
 
   @override
@@ -155,8 +162,8 @@ class _AddWeightDialogState extends State<AddWeightDialog> {
         ),
         FilledButton(
           style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(AppDimens.buttonMinHeight)),
-          onPressed: _isValid ? _save : null,
-          child: const Text('保存'),
+          onPressed: (_isValid && !_isSaving) ? _save : null,
+          child: _isSaving ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)) : const Text('保存'),
         ),
       ],
     );

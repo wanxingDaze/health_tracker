@@ -2,11 +2,15 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/weight_record.dart';
 import '../models/activity.dart';
 
 class WeightRepository extends ChangeNotifier {
+  void _safeNotify() {
+    SchedulerBinding.instance.addPostFrameCallback((_) => notifyListeners());
+  }
   static const _key = 'weight_records';
 
   List<WeightRecord> _records = [];
@@ -58,7 +62,7 @@ class WeightRepository extends ChangeNotifier {
           ..sort((a, b) => b.date.compareTo(a.date));
       } catch (_) {}
     }
-    notifyListeners();
+    _safeNotify();
   }
 
   Future<void> _save() async {
@@ -70,13 +74,20 @@ class WeightRepository extends ChangeNotifier {
   Future<void> add(WeightRecord record) async {
     _records.insert(0, record);
     await _save();
-    notifyListeners();
+    _safeNotify();
   }
 
   Future<void> delete(WeightRecord record) async {
     _records.removeWhere((e) => e.id == record.id);
     await _save();
-    notifyListeners();
+    _safeNotify();
+  }
+
+  Future<void> deleteBatch(List<WeightRecord> toDelete) async {
+    final ids = toDelete.map((r) => r.id).toSet();
+    _records.removeWhere((e) => ids.contains(e.id));
+    await _save();
+    _safeNotify();
   }
 
   /// 加载指定天数的模拟体重数据（用于测试图表）
@@ -117,6 +128,6 @@ class WeightRepository extends ChangeNotifier {
     })
       ..sort((a, b) => b.date.compareTo(a.date));
     await _save();
-    notifyListeners();
+    _safeNotify();
   }
 }

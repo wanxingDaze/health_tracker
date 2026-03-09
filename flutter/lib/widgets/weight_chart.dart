@@ -261,7 +261,7 @@ class _WeightChartState extends State<WeightChart> {
                               style: TextStyle(color: Colors.grey[600], fontSize: 10),
                             );
                           }
-                          return const SizedBox();
+                          return const SizedBox(width: 1, height: 1);
                         },
                       ),
                     ),
